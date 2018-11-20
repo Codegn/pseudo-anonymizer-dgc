@@ -7,27 +7,27 @@ import pandas as pd
 el futuro se tendría que poder elegir una carpeta que  contenga 
 todos los archivos a anonimizar """
 
-input_folder = Path('D:/sectra/data/DGC/sample')
-output_folder = Path('D:/sectra/data/DGC/sample/anonimizados')
+input_folder = Path('sample')
+output_folder = Path('sample/anonimizados')
 delimiter = ';'
 
 if not os.path.exists(output_folder):
-    os.makedir(output_folder)
+    os.makedirs(output_folder)
 
 """ estoy considerando como trabajar con el diccionario dado que
 no queremos que se pierda entre archivos, y tiene que estar contenido 
 en una ruta que sea independiente de los archivos que se quieren anonimizar"""
 
-dict_path = Path('D:/sectra/data/DGC/diccionario.txt')
+dict_path = Path('carpeta_diccionario/diccionario.txt')
 
 """ aqui se debe abrir el diccionario existente o crear uno 
 si es que no existe """
 
-if os.path.exists(dict_path):
-    with open(dict_path, 'r') as f:
+if dict_path.exists():
+    with open(dict_path, 'a') as f:
         placas_id = json.load(f)
 else:
-    os.makedir(dict_path)
+    os.makedirs(dict_path)
     placas_id = {}
 
 """ ahora se comienza el ciclo sobre todos los archivos que se encuentran
@@ -51,7 +51,7 @@ for root, dirs, files in os.walk(input_folder):
                 placas_id[placa] = max(placas_id.values(), default=0) + 1
 
         # se reemplazan las placas por los IDs correspondientes del diccionario
-        df.iloc[:, 57:60].map(placas_id)
+        df.iloc[:, 57:60].replace(placas_id)
 
         # se guarda una actualización del diccionario
         with open(dict_path, 'w') as f:
