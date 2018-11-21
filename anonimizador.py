@@ -16,18 +16,21 @@ if not os.path.exists(output_folder):
 
 """ estoy considerando como trabajar con el diccionario dado que
 no queremos que se pierda entre archivos, y tiene que estar contenido 
-en una ruta que sea independiente de los archivos que se quieren anonimizar"""
+en una ruta que sea independiente de los archivos que se quieren anonimizar """
 
-dict_path = Path('carpeta_diccionario/diccionario.txt')
-
+dict_folder_path = Path('carpeta_diccionario')
+dict_file_path = 'diccionario.txt'
+dict_path = dict_folder_path / dict_file_path
 """ aqui se debe abrir el diccionario existente o crear uno 
 si es que no existe """
 
 if dict_path.exists():
-    with open(dict_path, 'a') as f:
+    with open(dict_path) as f:
         placas_id = json.load(f)
+elif not dict_folder_path.exists():
+    os.makedirs(dict_folder_path)
+    placas_id = {}
 else:
-    os.makedirs(dict_path)
     placas_id = {}
 
 """ ahora se comienza el ciclo sobre todos los archivos que se encuentran
@@ -40,23 +43,27 @@ for root, dirs, files in os.walk(input_folder):
         # se lee el archivo ignorando la primera dila que contiene información diferente
         df = pd.read_csv(file,
                          header=None,
-                         delimiter=delimiter,
+                         sep=delimiter,
                          skiprows=[0])
 
         # se identifican todas las placas que aparezcan en las columnas 58, 58 y 60 del archivo formato ST4
         placas = pd.unique(df.iloc[:, 57:60].values.ravel('K'))
+        # eliminamos el valor 'nan'
+        
         # iteramos sobre estos valores para actualizar el diccionario y asignar nuevos IDs a las nuevas placas.
         for placa in placas:
-            if placa not in placas_id:
+            if (placa != 'nan') and (placa not in placas_id):
                 placas_id[placa] = max(placas_id.values(), default=0) + 1
 
         # se reemplazan las placas por los IDs correspondientes del diccionario
-        df.iloc[:, 57:60].replace(placas_id)
+        df.iloc[:, 57:60] = df.iloc[:, 57:60].replace(placas_id)
 
         # se guarda una actualización del diccionario
         with open(dict_path, 'w') as f:
             json.dump(placas_id, f)
 
         # se guarda el archivo anonimizado
-        df.to_csv(output_folder / filename, delimiter = delimiter)
+        df.to_csv(output_folder / filename, 
+                  sep = delimiter, 
+                  index = False)
 
