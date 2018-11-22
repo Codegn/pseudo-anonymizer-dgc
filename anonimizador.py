@@ -52,7 +52,9 @@ for root, dirs, files in os.walk(input_folder):
         
         # iteramos sobre estos valores para actualizar el diccionario y asignar nuevos IDs a las nuevas placas.
         for placa in placas:
-            if (placa != 'nan') and (placa not in placas_id):
+            # aquí colocaré cosas específicas del archivo estandar ST4
+
+            if (type(placa) == str) and (len(bytearray.fromhex(placa).decode()) > 0) and (bytearray.fromhex(placa).decode()[0] == '') and (placa not in placas_id):
                 placas_id[placa] = max(placas_id.values(), default=0) + 1
 
         # se reemplazan las placas por los IDs correspondientes del diccionario
