@@ -2,10 +2,14 @@ import os
 from pathlib import Path
 import json
 import pandas as pd
+from tkinter import filedialog
+from tkinter.filedialog import askdirectory
 
 """ aqui se debe ingresar la ruta del archivo a anonimizar en 
 el futuro se tendría que poder elegir una carpeta que  contenga 
 todos los archivos a anonimizar """
+
+input_folder = askdirectory()
 
 input_folder = Path('sample')
 output_folder = Path('sample/anonimizados')
@@ -54,11 +58,13 @@ for root, dirs, files in os.walk(input_folder):
         for placa in placas:
             # aquí colocaré cosas específicas del archivo estandar ST4
 
-            if (type(placa) == str) and (len(bytearray.fromhex(placa).decode()) > 0) and (bytearray.fromhex(placa).decode()[0] == '') and (placa not in placas_id):
+            if (type(placa) == str) and (int(placa.replace(' ','0')[0:2]) >=5) and (int(placa.replace(' ','0')[0:2]) <=6) and (placa not in placas_id):
                 placas_id[placa] = max(placas_id.values(), default=0) + 1
 
         # se reemplazan las placas por los IDs correspondientes del diccionario
-        df.iloc[:, 57:60] = df.iloc[:, 57:60].replace(placas_id)
+        df.iloc[:, 57] = df.iloc[:, 57].map(placas_id)
+        df.iloc[:, 58] = df.iloc[:, 58].map(placas_id)
+        df.iloc[:, 59] = df.iloc[:, 59].map(placas_id)
 
         # se guarda una actualización del diccionario
         with open(dict_path, 'w') as f:
