@@ -3,3 +3,6 @@
 \.vscode
 .DS_Store
 \carpeta_diccionario
+\__pycache__
+\build
+\dist
